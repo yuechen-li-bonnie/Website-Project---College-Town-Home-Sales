@@ -1,31 +1,240 @@
-<!DOCTYPE html>
-<!-- A placeholder from the Home Sales template. Replace this file with your site's first page. -->
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Under construction</title>
-  <!-- An empty icon, so the browser doesn't log an error looking for favicon.ico -->
+  <meta name="description" content="Compare median home sale prices and sales counts across U.S. college towns.">
+  <title>College-Town Housing Market Dashboard</title>
   <link rel="icon" href="data:,">
   <style>
-    :root { color-scheme: light dark; }
-    body {
-      max-width: 40rem;
-      margin: 0 auto;
-      padding: 3rem 1rem;
+    :root {
+      color-scheme: light;
+      --ink: #182937;
+      --muted: #51616a;
+      --paper: #f5f3ed;
+      --line: #e4e5df;
+      --hero: #122c39;
+      --accent: #ad4828;
       font-family: system-ui, sans-serif;
-      line-height: 1.5;
+      color: var(--ink);
+      background: var(--paper);
     }
-    footer { margin-top: 3rem; font-size: 0.875rem; opacity: 0.75; }
+    * { box-sizing: border-box; }
+    body { margin: 0; line-height: 1.55; }
+    .wrap { width: min(100% - 2rem, 74rem); margin-inline: auto; }
+    .hero {
+      color: #fffaf2;
+      background: radial-gradient(ellipse at top right, #244b50, transparent 65%), var(--hero);
+      padding: clamp(2.5rem, 7vw, 5.5rem) 0 4.5rem;
+    }
+    h1, h2, p { margin: 0; }
+    h1, h2 { font-family: Georgia, serif; font-weight: 500; line-height: 1.08; }
+    h1 { max-width: 19ch; font-size: clamp(2.55rem, 6.4vw, 5.3rem); letter-spacing: -.045em; }
+    h2 { font-size: clamp(1.65rem, 3vw, 2rem); letter-spacing: -.03em; }
+    .intro { color: #deebe9; max-width: 58ch; margin-top: 1.2rem; }
+    .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .8rem; margin: -2rem 0 1.25rem; }
+    .stats div, .panel {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: .85rem;
+      box-shadow: 0 4px 14px #18293708;
+    }
+    .stats div { padding: clamp(.65rem, 2vw, 1.25rem); display: flex; flex-direction: column-reverse; gap: .25rem; }
+    .stats dt { color: var(--muted); font-size: .86rem; }
+    .stats dd { margin: 0; font-size: clamp(1.25rem, 4vw, 2.4rem); line-height: 1.1; font-weight: 650; letter-spacing: -.04em; }
+    .number, td { font-variant-numeric: tabular-nums; }
+    .method { color: var(--muted); margin: 0 0 1.35rem; font-size: .9rem; }
+    .method strong { color: var(--accent); }
+    .panels { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 1rem; }
+    [hidden] { display: none !important; }
+    .panel { min-width: 0; padding: clamp(.85rem, 2vw, 1.5rem); }
+    .subtitle { color: var(--muted); font-size: .85rem; margin-top: .4rem; }
+    .chart { list-style: none; margin: 1rem 0 0; padding: 0; }
+    .chart li {
+      display: grid;
+      grid-template-columns: minmax(0, 8.6rem) minmax(0, 1fr) 5.5rem;
+      align-items: center;
+      gap: .65rem;
+      min-height: 2.5rem;
+      border-bottom: 1px solid var(--line);
+      font-size: .85rem;
+    }
+    .track { background: #f1eee7; border-radius: .2rem; height: .72rem; overflow: hidden; }
+    .bar { display: block; height: 100%; background: var(--accent); border-radius: inherit; }
+    .chart .number { text-align: right; font-weight: 650; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: .85rem; }
+    th, td { padding: .55rem .3rem; border-bottom: 1px solid var(--line); text-align: right; }
+    th:first-child { text-align: left; padding-left: 0; }
+    th:last-child, td:last-child { padding-right: 0; }
+    thead { color: var(--muted); }
+    tbody th { font-weight: 550; }
+    td { white-space: nowrap; }
+    #status { margin: 1rem 0; }
+    footer { margin: 1.5rem auto 2rem; color: var(--muted); font-size: .82rem; }
+    footer a { color: #245e63; text-underline-offset: .2em; }
+    @media (max-width: 52rem) {
+      .panels { grid-template-columns: minmax(0, 1fr); }
+    }
+    @media (max-width: 30rem) {
+      .chart li { grid-template-columns: minmax(0, 6.4rem) minmax(0, 1fr) 4.65rem; gap: .35rem; }
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .stats div:last-child { grid-column: 1 / -1; }
+    }
   </style>
 </head>
 <body>
-  <main>
-    <h1>This site is under construction</h1>
-    <p>It will show findings from the College-town home sales dataset.</p>
+  <header class="hero">
+    <div class="wrap">
+      <h1>College-Town Housing Market Dashboard</h1>
+      <p class="intro">Compare completed home sales in cities and towns near U.S. university campuses. Each record represents one sale in a dataset collected from public property listings in March 2026.</p>
+    </div>
+  </header>
+  <main class="wrap">
+    <dl class="stats">
+      <div><dt>Total home sales</dt><dd id="sales" class="number">—</dd></div>
+      <div><dt>Cities and towns</dt><dd id="cities" class="number">—</dd></div>
+      <div><dt>Sales used for medians</dt><dd id="eligible" class="number">—</dd></div>
+    </dl>
+    <p class="method"><strong>Price analysis excludes sales under $10,000.</strong> The total and city sales counts include all recorded sales.</p>
+    <p id="status" role="status">Loading home sales…</p>
+    <noscript><p>Enable JavaScript to calculate the dashboard from the sales CSV.</p></noscript>
+    <div id="results" class="panels" hidden>
+      <section class="panel" aria-labelledby="chart-heading">
+        <h2 id="chart-heading">Median sale price by city</h2>
+        <p class="subtitle">Highest to lowest · USD</p>
+        <ol class="chart" id="chart" aria-labelledby="chart-heading" role="list"></ol>
+      </section>
+      <section class="panel" aria-labelledby="table-heading">
+        <h2 id="table-heading">City sales breakdown</h2>
+        <p class="subtitle">Median sale price and total recorded sales</p>
+        <table aria-labelledby="table-heading">
+          <thead>
+            <tr><th scope="col">City</th><th scope="col">Median price</th><th scope="col">Sales</th></tr>
+          </thead>
+          <tbody id="city-rows"></tbody>
+        </table>
+      </section>
+    </div>
+    <footer>
+      <p>College-town home sales dataset, version 1.0 (2026). University of Illinois-Deloitte Foundation Center for Business Emerging Technologies.</p>
+      <p><a href="data/college_town_home_sales.csv">Download CSV</a> · <a href="docs/data_description_sheet.md">Data description</a></p>
+    </footer>
   </main>
-  <footer>
-    <p>Data: College-town home sales dataset, version 1.0 (2026). University of Illinois-Deloitte Foundation Center for Business Emerging Technologies. Data collected March 2026.</p>
-  </footer>
+  <script>
+    const minimumPrice = 10000;
+    const dollars = new Intl.NumberFormat('en-US', {
+      style: 'currency', currency: 'USD', maximumFractionDigits: 0
+    });
+    const integer = new Intl.NumberFormat('en-US');
+
+    // Keep CSV fields as text, including identifiers with leading zeros.
+    function parseCsv(csv) {
+      const rows = [];
+      let row = [];
+      const fields = /(?:^|,|\r\n|\n|\r)(?:"((?:[^"]|"")*)"|([^",\r\n]*))/g;
+      for (const match of csv.replace(/^\uFEFF/, '').matchAll(fields)) {
+        const delimiter = match[0][0];
+        if (delimiter === '\r' || delimiter === '\n') {
+          rows.push(row);
+          row = [];
+        }
+        row.push(match[1] === undefined ? match[2] : match[1].replace(/""/g, '"'));
+      }
+      rows.push(row);
+      return rows;
+    }
+
+    function median(prices) {
+      if (prices.length === 0) return null;
+      prices.sort((a, b) => a - b);
+      const middle = Math.floor(prices.length / 2);
+      return prices.length % 2 ? prices[middle] : (prices[middle - 1] + prices[middle]) / 2;
+    }
+
+    function summarize([header, ...rows]) {
+      const cityIndex = header.indexOf('city');
+      const stateIndex = header.indexOf('state');
+      const priceIndex = header.indexOf('sale_price');
+      if ([cityIndex, stateIndex, priceIndex].includes(-1)) throw new Error('Missing sales columns');
+
+      const cities = new Map();
+      let total = 0;
+      let eligible = 0;
+
+      for (const row of rows) {
+        if (row.length === 1 && row[0] === '') continue;
+        if (row.length !== header.length) throw new Error('Unexpected sales row length');
+
+        const label = row[cityIndex] + ', ' + row[stateIndex];
+        if (!cities.has(label)) cities.set(label, { label, count: 0, prices: [] });
+        const city = cities.get(label);
+        city.count++;
+        total++;
+
+        const price = Number(row[priceIndex]);
+        if (Number.isFinite(price) && price >= minimumPrice) {
+          city.prices.push(price);
+          eligible++;
+        }
+      }
+      if (total === 0) throw new Error('No sales records');
+
+      const ranked = Array.from(cities.values(), city => ({
+        label: city.label, count: city.count, median: median(city.prices)
+      }));
+      ranked.sort((a, b) => (b.median ?? 0) - (a.median ?? 0) || a.label.localeCompare(b.label, 'en-US'));
+      return { total, eligible, ranked };
+    }
+
+    function element(tag, value, className) {
+      const node = document.createElement(tag);
+      node.textContent = value;
+      if (className) node.className = className;
+      return node;
+    }
+
+    function render({ total, eligible, ranked }) {
+      document.getElementById('sales').textContent = integer.format(total);
+      document.getElementById('cities').textContent = integer.format(ranked.length);
+      document.getElementById('eligible').textContent = integer.format(eligible);
+      const chart = document.getElementById('chart');
+      const table = document.getElementById('city-rows');
+      const maxPrice = ranked[0].median ?? 0;
+
+      for (const city of ranked) {
+        const price = city.median === null ? 'Unavailable' : dollars.format(city.median);
+        const item = document.createElement('li');
+        const track = element('span', '', 'track');
+        track.setAttribute('aria-hidden', 'true');
+        const bar = element('span', '', 'bar');
+        bar.style.width = (maxPrice ? city.median / maxPrice * 100 : 0) + '%';
+        track.append(bar);
+        item.append(element('span', city.label), track, element('span', price, 'number'));
+        chart.append(item);
+
+        const row = document.createElement('tr');
+        const label = element('th', city.label);
+        label.scope = 'row';
+        row.append(label, element('td', price), element('td', integer.format(city.count)));
+        table.append(row);
+      }
+    }
+
+    async function loadDashboard() {
+      const status = document.getElementById('status');
+      try {
+        const response = await fetch('data/college_town_home_sales.csv');
+        if (!response.ok) throw new Error('CSV request failed (' + response.status + ')');
+        render(summarize(parseCsv(await response.text())));
+        document.getElementById('results').hidden = false;
+        status.hidden = true;
+      } catch (error) {
+        console.error(error);
+        status.textContent = 'The sales data could not be loaded. Refresh the page to try again.';
+      }
+    }
+
+    loadDashboard();
+  </script>
 </body>
 </html>
